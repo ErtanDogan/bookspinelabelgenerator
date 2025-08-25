@@ -3,6 +3,23 @@ import {useState} from 'react'
 import {Page, Text, View, Document, StyleSheet, PDFDownloadLink} from '@react-pdf/renderer'
 import { PDFViewer } from '@react-pdf/renderer'
 
+function LargeType({largeType, setLargeType}){
+  return (
+    <>
+        <h3>Large Type Tag: </h3>
+        <input type="checkbox" id="LT" onChange={(event) => {
+          if (event.target.checked){
+            setLargeType("LT")
+          } else {
+            setLargeType("")
+          }
+        }}></input>
+        <label for="LT">(LT) Large Type</label>
+        <br></br>
+    </>
+  )
+}
+
 function Author({setName, tag, setShownName}) {
   let text = "Author Last Name"
   if (tag == "B") {
@@ -11,7 +28,7 @@ function Author({setName, tag, setShownName}) {
   
   return (
     <>
-        <h3>{text}</h3>
+        <h3>{text}: </h3>
         <input type="text" id="Author" onChange={(event) => {
           if (tag == "B"){
             setName(event.target.value.toUpperCase())
@@ -28,7 +45,7 @@ function Author({setName, tag, setShownName}) {
 function Language({langValue, setLangValue}) {
     return (
         <>
-            <h3>Language (Default is English)</h3>
+            <h3>Language (Default is English): </h3>
             <input type="radio" id="English" name = "Language" defaultChecked value="" onChange={(event) => setLangValue(event.target.value)}/>
             <label for="English">(None) English</label><br />
             <input type="radio" id="CH" name = "Language" value="CH" onChange={(event) => setLangValue(event.target.value)}/>
@@ -38,18 +55,22 @@ function Language({langValue, setLangValue}) {
         </>
     )
 }
-function JTag({jValue, setJValue}) {
+function AgeTag({ageValue, setAgeValue}) {
     return (
         <>
-            <h3>J Fiction</h3>
-            <input type="checkbox" id="J" name="JTag" value="J" onChange={(event)=>{
-              if(event.target.checked){
-                setJValue("J")
-              } else {
-                setJValue("")
-              }
+            <h3>Age Group: </h3>
+            <input type="radio" id="Adult" name="AgeTag" value="Adult" onChange={(event)=>{
+              setAgeValue("")
+              }}></input>
+            <label for="Adult">(None) Adult</label><br></br>
+            <input type="radio" id="J" name="AgeTag" value="J" onChange={(event)=>{
+              setAgeValue("J")
               }}></input>
             <label for="J">(J) Junior</label><br></br>
+            <input type="radio" id="Teen" name="AgeTag" value="Teen" onChange={(event)=>{
+              setAgeValue("TEEN")
+              }}></input>
+            <label for="Teen">(TEEN) Teen</label><br></br>
         </>
     )
 }
@@ -77,9 +98,27 @@ function SectionTag ({setSectionValue, setDecimal, decimal, sectionValue, setNam
               if(!(sectionValue == "F" || sectionValue == "B")){
                 setSectionValue(event.target.value)
               }
-
-
-            }}/>
+            }}/><br></br>
+            <input type="radio" id="SF" name="SectionTag" value="SF" onClick={()=>{
+                setSectionValue("SF")
+                setName(name.toUpperCase().slice(0, 3))
+              }}></input>
+            <label for="SF">(SF) Science Fiction </label><br></br>
+            <input type="radio" id="M" name="SectionTag" value="M" onClick={()=>{
+                setSectionValue("M")
+                setName(name.toUpperCase().slice(0, 3))
+              }}></input>
+            <label for="M">(M) Mystery </label><br></br>
+            <input type="radio" id="P" name="SectionTag" value="P" onClick={()=>{
+                setSectionValue("P")
+                setName(name.toUpperCase().slice(0, 3))
+              }}></input>
+            <label for="P">(P) Picture Book </label><br></br>
+            <input type="radio" id="R" name="SectionTag" value="R" onClick={()=>{
+                setSectionValue("R")
+                setName(name.toUpperCase().slice(0, 3))
+              }}></input>
+            <label for="R">(R) Reference </label><br></br>
         </>
     )
 }
@@ -99,10 +138,15 @@ const styles = StyleSheet.create({
   }
 });
 
-function MyDocument({jTag, lang, section, name}) {
+function MyDocument({largeType, age, lang, section, name}) {
   let text = ''
-  if (jTag != ""){
-    text = text + jTag + "\n"
+  if (largeType != ""){
+    text = text + largeType + "\n"
+  }
+  if (age != ""){
+    if (section != "P"){
+      text = text + age + "\n"
+    }
   }
   if (lang != ""){
     text = text + lang + "\n"
@@ -129,9 +173,10 @@ function App() {
   const [authorName, setAuthorName] = useState("")
   const [shownName, setShownName] = useState("")
   const [lang, setLang] = useState("")
-  const [jTag, setJTag] = useState(false)
+  const [age, setAge] = useState("")
   const [sectionTag, setSectionTag] = useState("F")
   const [nfDecimal, setNfDecimal] = useState("0.0")
+  const [largeType, setLargeType] = useState("")
 
   return (
     <>
@@ -140,7 +185,8 @@ function App() {
       </div>
       <div class='options'>
         <h2>Parameters:</h2>
-        <JTag jValue={jTag} setJValue={(param)=>setJTag(param)}/>
+        <LargeType largeType={largeType} setLargeType={(param) => setLargeType(param)} />
+        <AgeTag ageValue={age} setAgeValue={(param)=>setAge(param)}/>
         <Language langValue={lang} setLangValue={(param) => setLang(param)}/>
         <SectionTag setSectionValue={(param) => setSectionTag(param)} setDecimal={(param) => setNfDecimal(param)} decimal={nfDecimal} sectionValue={sectionTag} setName={(param) => setShownName(param)} name={authorName}/>
         <Author setName={(param) => setAuthorName(param)} tag={sectionTag} setShownName={(param) => setShownName(param)}/>
@@ -148,13 +194,13 @@ function App() {
      
       <div class="output">
         <h2>Download and Print:</h2>
-        <PDFDownloadLink document={<MyDocument jTag={jTag} lang={lang} section={sectionTag} name={shownName} />} fileName="test.pdf">
+        <PDFDownloadLink document={<MyDocument largeType={largeType} age={age} lang={lang} section={sectionTag} name={shownName} />} fileName="test.pdf">
           Download And Print
         </PDFDownloadLink>
         <br />
         <br />
         <PDFViewer width='500px' height='300px'>
-          <MyDocument jTag={jTag} lang={lang} section={sectionTag} name={shownName}/>
+          <MyDocument largeType={largeType} age={age} lang={lang} section={sectionTag} name={shownName}/>
         </PDFViewer>
       </div>
      
